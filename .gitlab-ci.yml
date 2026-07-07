@@ -1,0 +1,12 @@
+dev-deployment:
+  variables:
+    GIT_STRATEGY: fetch
+  script:
+    - bash ~/gitlab/NextJS/nextjs-projectdeploy-yarn-v1.sh
+  environment:
+    name: Development
+    url: https://curemos-admin.dedicateddevelopers.us/
+  tags:
+    - dev-runner
+  only:
+    - dev

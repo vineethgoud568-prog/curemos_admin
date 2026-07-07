@@ -1,0 +1,376 @@
+'use client';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Icon } from '@iconify-icon/react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+import {
+  subadminFormSchema,
+  subadminPermissionActions,
+  subadminPermissionModules,
+  TSubadminFormValues,
+} from '../zod/subadmin.schema';
+
+import { PageCardHeader } from '@/@core/components/Table/tanstack-table/CardHeader';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { getAllowedPermissions } from '@/lib/utils';
+
+const permissionLabels: Record<string, string> = {
+  add: 'Add',
+  edit: 'Edit',
+  view: 'View',
+  list: 'List',
+  delete: 'Delete',
+};
+
+interface ISubadminAddEditFormProps {
+  title: string;
+  loading: boolean;
+  initialData?: Partial<TSubadminFormValues>;
+  onSubmit: (data: TSubadminFormValues) => void | Promise<void>;
+}
+
+const SubadminAddEditForm: React.FC<ISubadminAddEditFormProps> = ({
+  title,
+  loading,
+  onSubmit,
+  initialData,
+}) => {
+  const [profilePreview, setProfilePreview] = useState<string | null>(null);
+
+  const defaultValues: Partial<TSubadminFormValues> = {
+    full_name: '',
+    image: '' as unknown as File,
+    permissions: {
+      doctor: [],
+      patient: [],
+    },
+    ...initialData,
+  };
+
+  const form = useForm<TSubadminFormValues>({
+    resolver: zodResolver(subadminFormSchema),
+    defaultValues,
+  });
+
+  const {
+    reset,
+    handleSubmit,
+    clearErrors,
+    watch,
+    formState: { errors },
+  } = form;
+
+  useEffect(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      reset({ ...defaultValues, ...initialData });
+      setProfilePreview(initialData.image as unknown as string);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData, reset]);
+
+  const handleReset = () => {
+    reset(defaultValues);
+  };
+
+  const isAllSelected = () => {
+    const permissions = watch('permissions');
+
+    return subadminPermissionModules
+      .filter((m) => m !== 'subadmin')
+      .every((moduleName) => {
+        const selected = permissions?.[moduleName] || [];
+
+        const allowed = subadminPermissionActions.filter((permission) => {
+          if (moduleName === 'report' && ['add', 'edit'].includes(permission)) return false;
+          if (moduleName === 'referral' && ['add', 'edit'].includes(permission)) return false;
+          if (moduleName === 'privacy-policy' && permission !== 'edit') return false;
+          if (moduleName === 'terms-and-conditions' && permission !== 'edit') return false;
+          if (moduleName === 'contact' && permission !== 'edit') return false;
+          if (moduleName === 'banners' && permission !== 'edit') return false;
+
+          return true;
+        });
+
+        return allowed.every((p) => selected.includes(p));
+      });
+  };
+
+  const handleSelectAllModules = (checked: boolean) => {
+    const updatedPermissions: Record<string, string[]> = {};
+
+    subadminPermissionModules.forEach((moduleName) => {
+      if (moduleName === 'subadmin') return;
+
+      const allowedPermissions = subadminPermissionActions.filter((permission) => {
+        if (moduleName === 'report' && ['add', 'edit'].includes(permission)) return false;
+        if (moduleName === 'referral' && ['add', 'edit'].includes(permission)) return false;
+        if (moduleName === 'privacy-policy' && permission !== 'edit') return false;
+        if (moduleName === 'terms-and-conditions' && permission !== 'edit') return false;
+        if (moduleName === 'contact' && permission !== 'edit') return false;
+        if (moduleName === 'banners' && permission !== 'edit') return false;
+
+        return true;
+      });
+
+      updatedPermissions[moduleName] = checked ? allowedPermissions : [];
+    });
+
+    form.setValue('permissions', updatedPermissions);
+  };
+
+  return (
+    <div className="w-full space-y-4 p-4">
+      <PageCardHeader title={title} backButton hideAddButton />
+
+      <Form {...form}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Card>
+            <CardContent className="flex flex-col gap-6 pt-6">
+              <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="full_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel required>Subadmin Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel required>Subadmin Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="group relative mb-4">
+                  <p style={{ color: '#093261' }} className="text-sm font-semibold">
+                    Subadmin Image
+                  </p>
+                  <div className="relative inline-block">
+                    <div className="border-primary/10 relative h-28 w-28 overflow-hidden rounded-full border-4 shadow-xl sm:h-32 sm:w-32">
+                      {profilePreview ? (
+                        <Image
+                          src={profilePreview}
+                          alt="Profile Preview"
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="relative h-full w-full">
+                          <Image
+                            src="/images/no_user_found.png"
+                            alt="Profile Placeholder"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <label
+                      htmlFor="profile-upload"
+                      className="bg-primary absolute right-0 bottom-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-110 active:scale-95 sm:h-9 sm:w-9"
+                    >
+                      <Icon icon="lucide:camera" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <input
+                        id="profile-upload"
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            form.setValue('image', file);
+                            clearErrors('image');
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setProfilePreview(reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {!!errors?.image && (
+                    <p style={{ color: '#e54d2e', fontSize: '12px', fontWeight: 500 }}>
+                      {errors?.image?.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="mt-4">
+            <CardContent className="space-y-5 pt-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-semibold text-slate-900">Permissions</h3>
+                <div>
+                  <Checkbox
+                    checked={isAllSelected()}
+                    onCheckedChange={(checked) => {
+                      handleSelectAllModules(!!checked);
+                    }}
+                  />
+                  <span className="pl-1 text-base font-semibold text-slate-600">Select All</span>
+                </div>
+              </div>
+
+              <div className="divide-y rounded-md border">
+                {subadminPermissionModules.map((moduleName) => {
+                  if (moduleName === 'subadmin') return null;
+                  return (
+                    <FormField
+                      key={moduleName}
+                      control={form.control}
+                      name={`permissions.${moduleName}`}
+                      render={({ field }) => {
+                        const selectedPermissions = field.value || [];
+
+                        return (
+                          <FormItem className="grid gap-4 p-4 sm:grid-cols-[160px_1fr] sm:items-center">
+                            <FormLabel className="text-sm font-semibold text-slate-800 capitalize">
+                              <Checkbox
+                                checked={getAllowedPermissions(moduleName).every((p) =>
+                                  selectedPermissions.includes(p),
+                                )}
+                                onCheckedChange={(checked) => {
+                                  const allowedPermissions = getAllowedPermissions(moduleName);
+
+                                  field.onChange(checked ? allowedPermissions : []);
+                                }}
+                              />
+                              {moduleName}
+                            </FormLabel>
+                            <FormControl>
+                              <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+                                {subadminPermissionActions.map((permission) => {
+                                  const inputId = `${moduleName}-${permission}`;
+
+                                  if (
+                                    moduleName === 'report' &&
+                                    (permission === 'add' || permission === 'edit')
+                                  )
+                                    return null;
+
+                                  if (
+                                    moduleName === 'referral' &&
+                                    (permission === 'add' || permission === 'edit')
+                                  )
+                                    return null;
+
+                                  if (moduleName === 'privacy-policy' && permission !== 'edit')
+                                    return null;
+
+                                  if (
+                                    moduleName === 'terms-and-conditions' &&
+                                    permission !== 'edit'
+                                  )
+                                    return null;
+
+                                  if (moduleName === 'contact' && permission !== 'edit')
+                                    return null;
+
+                                  if (moduleName === 'banners' && permission !== 'edit')
+                                    return null;
+
+                                  return (
+                                    <Label
+                                      key={permission}
+                                      htmlFor={inputId}
+                                      className="flex h-10 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                                    >
+                                      <Checkbox
+                                        id={inputId}
+                                        checked={selectedPermissions.includes(permission)}
+                                        onCheckedChange={(checked) => {
+                                          const updated = new Set(selectedPermissions);
+
+                                          if (checked) {
+                                            updated.add(permission);
+
+                                            // if selecting add/edit/delete/view → auto add list
+                                            if (
+                                              ['add', 'edit', 'delete', 'view'].includes(
+                                                permission,
+                                              ) &&
+                                              moduleName !== 'privacy-policy' &&
+                                              moduleName !== 'terms-and-conditions' &&
+                                              moduleName !== 'contact' &&
+                                              moduleName !== 'banners'
+                                            ) {
+                                              updated.add('list');
+                                            }
+                                          } else {
+                                            // prevent removing "list" if other permissions exist
+                                            if (permission === 'list') {
+                                              const hasOther = [...updated].some(
+                                                (p) => p !== 'list',
+                                              );
+                                              if (hasOther) return; // block uncheck
+                                            }
+
+                                            updated.delete(permission);
+                                          }
+
+                                          field.onChange(Array.from(updated));
+                                        }}
+                                      />
+                                      {permissionLabels[permission]}
+                                    </Label>
+                                  );
+                                })}
+                              </div>
+                            </FormControl>
+                            <FormMessage className="sm:col-start-2" />
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            </CardContent>
+
+            <CardFooter className="flex justify-start gap-2 pt-5">
+              <Button type="submit" disabled={loading}>
+                {loading ? 'Saving...' : 'Save'}
+              </Button>
+              <Button type="button" variant="outline" onClick={handleReset} disabled={loading}>
+                Reset
+              </Button>
+            </CardFooter>
+          </Card>
+        </form>
+      </Form>
+    </div>
+  );
+};
+
+export default SubadminAddEditForm;

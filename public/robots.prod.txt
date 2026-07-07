@@ -1,0 +1,3 @@
+# public/robots.prod.txt
+User-agent: *
+Disallow:

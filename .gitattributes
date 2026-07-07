@@ -1,0 +1,2 @@
+# Ensure all text files use LF (Line Feed)
+* text=auto eol=lf

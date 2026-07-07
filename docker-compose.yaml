@@ -1,0 +1,26 @@
+services:
+  #React Nextjs Node Service
+
+  node:
+    image: webskittersdocker/nvmnode22:latest
+
+    container_name: curemos-admin-ui-Nextjs
+
+    restart: unless-stopped
+
+    working_dir: /home/wtsadmin/myapp
+
+    volumes:
+      - ./:/home/wtsadmin/myapp
+
+    ports:
+      - '14597:14597'
+    command: >
+      sh -c "yarn start"
+
+#Docker Networks
+
+networks:
+  default:
+    external:
+      name: webskitters

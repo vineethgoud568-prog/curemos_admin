@@ -1,0 +1,15 @@
+node_modules
+.next
+.prettierrc
+components.json
+next.config.mjs
+package-lock.json
+package.json
+postcss.config.mjs
+README.md
+tsconfig.json
+.env
+src/components/ui
+
+# This file extends .gitignore as per Prettier documentation.
+# Patterns ignored in .gitignore will also be ignored by Prettier.

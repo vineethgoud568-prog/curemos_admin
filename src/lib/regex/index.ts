@@ -1,0 +1,16 @@
+export default {
+  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  space: /^.*\S.*$/,
+  passwordSpace: /\s/,
+  password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])/,
+  url: /^https?:\/\/[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}(\/.*)?$/,
+  zero: /^0+(\.0+)?$/,
+  singleDigit: /^\d$/,
+  protocol: /^https?:\/\//,
+  alphabetic: /^[A-Za-z\s]+$/,
+  alphabeticNoSpace: /^[A-Za-z]+$/,
+  alphanumeric: /^[A-Za-z0-9\s]+$/,
+  alphanumericNoSpace: /^[A-Za-z0-9]+$/,
+  expiry: /^(\d+)([smhdwMy])$/,
+  phone: /^\+?\d{8,15}$/,
+};

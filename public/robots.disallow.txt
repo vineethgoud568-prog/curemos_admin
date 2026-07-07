@@ -1,0 +1,3 @@
+# public/robots.disallow.txt
+User-agent: *
+Disallow: /

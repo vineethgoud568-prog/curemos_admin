@@ -1,0 +1,114 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+*.sh
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Lockfiles & Package Managers
+yarn.lock*
+package-lock.json*
+pnpm-lock.yaml*
+shrinkwrap.yaml*
+bun.lockb*
+bun.lock*
+install-state.gz*
+.yarn-integrity
+
+# Build & Output Directories
+.next
+out
+dist
+dist-ssr
+build
+.svelte-kit
+.webpack
+.nuxt
+
+# Test
+coverage
+.cache
+
+# IDE & Editor-Specific Files
+.idea
+*.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.vscode-test
+.gradle
+local.properties
+misc.xml
+
+# Node & Monorepo-Specific Files
+node_modules
+.turbo
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+.pnp
+
+# Debug & Error Logs
+*.log
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment Files
+.env
+
+# Service Worker & Cache-Related Files
+**/sw.js
+**/sw.js.map
+**/sw-*.js
+**/sw-*.js.map
+**/workbox-*.js
+**/workbox-*.js.map
+**/worker-*.js
+**/worker-*.js.map
+
+# Miscellaneous
+.DS_*
+*.keystore
+*.lcov
+*.tgz
+*.zip
+
+#codex
+*.codex
+
+#agent
+AGENTS.md
